@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pocket Picnic</title>
+  <meta name="description" content="A tiny mood-based picnic planner.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ff6b6b'/%3E%3Cpath d='M12 25h40v25H12z' fill='%23fff5df'/%3E%3Cpath d='M12 25h40M12 37h40M24 25v25M40 25v25' stroke='%23ff6b6b' stroke-width='5'/%3E%3C/svg%3E">
+  <style>
+    :root{--ink:#31312d;--cream:#fff8e9;--paper:#fffdf7;--red:#ff6868;--green:#4c8765;--yellow:#ffd86b;--shadow:0 18px 45px #594c3521}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;color:var(--ink);font:16px/1.45 ui-rounded,"Trebuchet MS",system-ui,sans-serif;background:var(--cream);overflow-x:hidden}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.4;background-image:radial-gradient(#e9cf9c 1px,transparent 1px);background-size:18px 18px}
+    main{position:relative;width:min(1040px,92vw);margin:auto;padding:46px 0 60px}
+    header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}.eyebrow{margin:0 0 4px;color:var(--green);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.8rem}h1{font-size:clamp(2.5rem,7vw,5.5rem);line-height:.9;margin:0;letter-spacing:-.065em}header p:last-child{max-width:270px;margin:0;font-weight:650}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:22px}.panel{background:var(--paper);border:2px solid var(--ink);border-radius:28px;padding:26px;box-shadow:var(--shadow)}h2{margin:0 0 18px;font-size:1.28rem}
+    fieldset{border:0;padding:0;margin:0 0 22px}legend{font-weight:800;margin-bottom:10px}.choices{display:flex;flex-wrap:wrap;gap:9px}.choice{position:relative}.choice input{position:absolute;opacity:0}.choice label{display:block;cursor:pointer;padding:10px 13px;border:2px solid #ded8ca;border-radius:999px;background:#fff;transition:.18s;user-select:none}.choice input:checked+label{border-color:var(--ink);background:var(--yellow);transform:translateY(-2px);box-shadow:0 4px 0 var(--ink)}.choice label:hover{border-color:var(--ink)}
+    button{font:inherit;font-weight:850;border:2px solid var(--ink);cursor:pointer}.generate{width:100%;padding:14px 18px;border-radius:14px;background:var(--red);color:white;box-shadow:0 5px 0 var(--ink);transition:.15s}.generate:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--ink)}.generate:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+    .card{position:relative;min-height:435px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;background:var(--green);color:white}.card:after{content:"";position:absolute;width:180px;height:180px;border:24px solid #ffffff18;border-radius:50%;right:-65px;top:-65px}.weather{font-size:3.6rem;filter:drop-shadow(0 4px 0 #0002)}.card h2{font-size:clamp(2rem,4vw,3.4rem);line-height:1;margin:18px 0 12px;letter-spacing:-.04em}.plan{font-size:1.1rem;max-width:420px;margin:0}.ticket{margin-top:32px;background:white;color:var(--ink);border:2px solid var(--ink);border-radius:18px;padding:17px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;box-shadow:0 6px 0 #263c2f}.ticket strong{display:block;font-size:1.08rem}.ticket small{display:block;margin-top:3px}.reroll{width:48px;height:48px;border-radius:50%;background:var(--yellow);font-size:1.25rem}.footer-note{text-align:center;color:#786f5f;margin:20px 0 0;font-size:.86rem}.pop{animation:pop .45s cubic-bezier(.2,.9,.3,1.3)}
+    .sprinkles{position:absolute;inset:0;pointer-events:none}.sprinkles i{position:absolute;width:10px;height:18px;border-radius:8px;background:var(--yellow);animation:fall 1s ease-out forwards}
+    @keyframes pop{50%{transform:scale(1.025) rotate(.4deg)}}@keyframes fall{from{transform:translateY(-40px) rotate(0);opacity:1}to{transform:translateY(470px) rotate(240deg);opacity:0}}
+    @media(max-width:760px){main{padding-top:28px}header{display:block}header p:last-child{margin-top:15px}.layout{grid-template-columns:1fr}.card{min-height:380px}.panel{padding:21px}}
+    @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<main>
+  <header><div><p class="eyebrow">A tiny day-out generator</p><h1>Pocket Picnic</h1></div><p>Pick three little things. We’ll pack the rest of the idea for you.</p></header>
+  <section class="layout">
+    <form class="panel" id="planner">
+      <h2>What kind of day is it?</h2>
+      <fieldset><legend>1. Sky</legend><div class="choices" id="weatherChoices"></div></fieldset>
+      <fieldset><legend>2. Mood</legend><div class="choices" id="moodChoices"></div></fieldset>
+      <fieldset><legend>3. Snack</legend><div class="choices" id="snackChoices"></div></fieldset>
+      <button class="generate" type="submit">Pack my picnic ✦</button>
+    </form>
+    <article class="panel card" id="card" aria-live="polite">
+      <div class="sprinkles" id="sprinkles"></div>
+      <div><div class="weather" id="weatherIcon">☀️</div><p class="eyebrow" style="color:#ffd86b">Today’s tiny plan</p><h2 id="title">The Golden Hour Club</h2><p class="plan" id="plan">Find a sunny patch, bring something fizzy, and stay until the shadows get long.</p></div>
+      <div class="ticket"><div><strong id="bring">Bring: strawberries + a soft blanket</strong><small id="mission">Tiny mission: spot three cloud shapes.</small></div><button class="reroll" type="button" id="reroll" aria-label="Make another plan" title="Make another plan">↻</button></div>
+    </article>
+  </section>
+  <p class="footer-note">Made for spontaneous afternoons. Your choices stay in this browser.</p>
+</main>
+<script>
+  const options={
+    weather:[['☀️','Sunny'],['⛅','Cloudy'],['🌦️','Drizzly']],
+    mood:[['🫧','Quiet'],['🎲','Playful'],['✨','Fancy']],
+    snack:[['🍓','Fruity'],['🥐','Bakery'],['🧀','Savory']]
+  };
+  const copy={
+    Quiet:{titles:['The Soft Afternoon','Blanket & Breeze','A Little Pause'],verbs:['Find the calmest corner and let the afternoon unfold slowly.','Bring one good book, then ignore it while you watch the trees.'],missions:['Name five sounds you usually miss.','Put your phone away for twenty minutes.']},
+    Playful:{titles:['The Tiny Field Day','Snack Quest','Operation: Outside'],verbs:['Choose a patch of grass and invent a game with unnecessarily dramatic rules.','Trade snacks, tell bad jokes, and crown a picnic champion.'],missions:['Find something shaped like a heart.','Make up a two-minute lawn game.']},
+    Fancy:{titles:['The Linen Napkin Society','Café Under the Sky','The Petite Garden Party'],verbs:['Dress one notch nicer than necessary and turn a blanket into the best table in town.','Pour something sparkling and toast to an extremely ordinary, excellent day.'],missions:['Give the picnic a ridiculous French name.','Take one album-cover-worthy photo.']}
+  };
+  const bring={Fruity:['strawberries + lemonade','grapes + tiny oranges'],Bakery:['croissants + jam','cinnamon rolls + iced coffee'],Savory:['cheese + crackers','sandwiches + crunchy pickles']};
+  const weatherLine={Sunny:'Claim a sunny patch.',Cloudy:'Enjoy the soft, flattering light.',Drizzly:'Find a covered porch or crack a window at home.'};
+  function mount(type){const box=document.getElementById(type+'Choices');options[type].forEach(([icon,label],i)=>{box.insertAdjacentHTML('beforeend',`<span class="choice"><input id="${type}${i}" type="radio" name="${type}" value="${label}" ${i===0?'checked':''}><label for="${type}${i}">${icon} ${label}</label></span>`)})}
+  Object.keys(options).forEach(mount);
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  function generate(celebrate=true){
+    const data=new FormData(document.getElementById('planner')),w=data.get('weather'),m=data.get('mood'),s=data.get('snack'),set=copy[m];
+    document.getElementById('weatherIcon').textContent=options.weather.find(x=>x[1]===w)[0];
+    document.getElementById('title').textContent=pick(set.titles);
+    document.getElementById('plan').textContent=weatherLine[w]+' '+pick(set.verbs);
+    document.getElementById('bring').textContent='Bring: '+pick(bring[s]);
+    document.getElementById('mission').textContent='Tiny mission: '+pick(set.missions);
+    const card=document.getElementById('card');card.classList.remove('pop');void card.offsetWidth;card.classList.add('pop');
+    localStorage.setItem('pocketPicnic',JSON.stringify({w,m,s})); if(celebrate) sprinkle();
+  }
+  function sprinkle(){const box=document.getElementById('sprinkles');box.innerHTML='';for(let i=0;i<14;i++){const dot=document.createElement('i');dot.style.left=Math.random()*100+'%';dot.style.animationDelay=Math.random()*.25+'s';dot.style.background=['#ffd86b','#ff8d8d','#fff'][i%3];box.appendChild(dot)}setTimeout(()=>box.innerHTML='',1400)}
+  document.getElementById('planner').addEventListener('submit',e=>{e.preventDefault();generate()});document.getElementById('reroll').addEventListener('click',()=>generate());
+  try{const saved=JSON.parse(localStorage.getItem('pocketPicnic'));if(saved){for(const [name,value] of Object.entries(saved)){const el=document.querySelector(`input[name="${name==='w'?'weather':name==='m'?'mood':'snack'}"][value="${value}"]`);if(el)el.checked=true}generate(false)}}catch(e){}
+</script>
+</body>
+</html>
